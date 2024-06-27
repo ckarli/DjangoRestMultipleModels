@@ -43,7 +43,8 @@ from drf_multiple_model.views import ObjectMultipleModelAPIView
 * pagination
 * Filtering -- either per queryset or on all querysets
 * custom model labeling
-
+* django-filters support
+* 
 For full configuration options, filtering tools, and more, see [the documentation](https://django-rest-multiple-models.readthedocs.org/en/latest/).
 
 # Basic Usage
@@ -68,11 +69,21 @@ class PlaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Play
         fields = ('genre','title','pages')
-
+        
+class PlayFilter(django_filters.FilterSet):
+    class Meta:
+        model = Play
+        fields = ['genre', 'pages']
+        
 class PoemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Poem
         fields = ('title','stanzas')
+
+class PoemFilter(django_filters.FilterSet):
+    class Meta:
+        model = Poem
+        fields = ['style', 'lines', 'stanzas']
 ```
 
 Then you might use the `ObjectMultipleModelAPIView` as follows:
@@ -83,8 +94,8 @@ from drf_multiple_model.views import ObjectMultipleModelAPIView
 
 class TextAPIView(ObjectMultipleModelAPIView):
     querylist = [
-        {'queryset': Play.objects.all(), 'serializer_class': PlaySerializer},
-        {'queryset': Poem.objects.filter(style='Sonnet'), 'serializer_class': PoemSerializer},
+        {'queryset': Play.objects.all(), 'serializer_class': PlaySerializer, 'filterset_class':PlayFilter},
+        {'queryset': Poem.objects.filter(style='Sonnet'), 'serializer_class': PoemSerializer,'filterset_class':PoemFilter},
         ....
     ]
 ```
