@@ -16,7 +16,7 @@ class BaseMultipleModelMixin(object):
 
     # default pagination state. Gets overridden if pagination is active
     is_paginated = False
-
+    default_filterset_class = None
     def get_querylist(self):
         assert self.querylist is not None, (
             '{} should either include a `querylist` attribute, '
@@ -47,10 +47,19 @@ class BaseMultipleModelMixin(object):
         the querylist
         """
         queryset = query_data.get('queryset', [])
+        filterset_class = query_data.get('filterset_class', None)
+
 
         if isinstance(queryset, QuerySet):
             # Ensure queryset is re-evaluated on each request.
             queryset = queryset.all()
+        if self.default_filterset_class is None and self.filterset_class is not None:
+            self.default_filterset_class = filterset_class
+
+        if filterset_class is not None:
+            self.filterset_class = filterset_class
+        else:
+            self.filterset_class = self.default_filterset_class
 
         # run rest_framework filters
         queryset = self.filter_queryset(queryset)
